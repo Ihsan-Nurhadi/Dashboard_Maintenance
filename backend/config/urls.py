@@ -20,6 +20,7 @@ api_patterns = [
     path("auth/login/", core_views.LoginView.as_view()),
     path("auth/logout/", core_views.LogoutView.as_view()),
     path("auth/me/", core_views.MeView.as_view()),
+    path("auth/change-password/", core_views.ChangePasswordView.as_view()),
     path("dashboard/summary/", core_views.DashboardSummaryView.as_view()),
     path("meta/", core_views.MetaView.as_view()),
     path("export/troubleshoots.xlsx", core_views.ExportTroubleshootsView.as_view()),

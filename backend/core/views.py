@@ -1,3 +1,4 @@
+import base64
 from io import BytesIO
 
 from django.conf import settings
@@ -6,7 +7,7 @@ from django.core.cache import cache
 from django.http import HttpResponse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from openpyxl import Workbook
 from openpyxl.styles import Font
 from rest_framework import status
@@ -35,6 +36,19 @@ def _client_ip(request):
     return (fwd.split(",")[0] if fwd else request.META.get("REMOTE_ADDR", "")).strip()
 
 
+def _decode_secret(val):
+    """Mendekode payload password yang dienkripsi/diobfuskasi agar tidak tampil polos di DevTools."""
+    if not val:
+        return ""
+    val_str = str(val).strip()
+    if val_str.startswith("enc:"):
+        try:
+            return base64.b64decode(val_str[4:]).decode("utf-8")
+        except Exception:
+            pass
+    return val_str
+
+
 @method_decorator(ensure_csrf_cookie, name="dispatch")
 class MeView(APIView):
     permission_classes = [AllowAny]
@@ -45,6 +59,7 @@ class MeView(APIView):
         return Response({"authenticated": False, "username": None})
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class LoginView(APIView):
     permission_classes = [AllowAny]
 
@@ -57,7 +72,9 @@ class LoginView(APIView):
                 status=status.HTTP_429_TOO_MANY_REQUESTS,
             )
         username = (request.data.get("username") or "").strip()
-        password = request.data.get("password") or ""
+        raw_password = request.data.get("password") or ""
+        password = _decode_secret(raw_password)
+
         user = authenticate(request, username=username, password=password)
         if user is None or not user.is_active:
             cache.set(key, fails + 1, settings.LOGIN_LOCK_SECONDS)
@@ -67,6 +84,30 @@ class LoginView(APIView):
         cache.delete(key)
         login(request, user)
         return Response({"authenticated": True, "username": user.get_username()})
+
+
+class ChangePasswordView(APIView):
+    """Memungkinkan user mengganti password langsung dari web dashboard."""
+
+    def post(self, request):
+        old_pass = _decode_secret(request.data.get("old_password") or "")
+        new_pass = _decode_secret(request.data.get("new_password") or "")
+
+        if not new_pass or len(new_pass) < 6:
+            return Response(
+                {"detail": "Password baru minimal 6 karakter."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not request.user.check_password(old_pass):
+            return Response(
+                {"detail": "Password lama tidak sesuai."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        request.user.set_password(new_pass)
+        request.user.save()
+        login(request, request.user)
+        return Response({"detail": "Password berhasil diperbarui."})
 
 
 class LogoutView(APIView):

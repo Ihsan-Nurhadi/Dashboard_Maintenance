@@ -5,6 +5,7 @@ import { api } from '../api/client';
 export function Login({ onLoginSuccess }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ export function Login({ onLoginSuccess }) {
     setLoading(true);
 
     try {
-      const res = await api.login({ username, password });
+      const res = await api.login({ username: username.trim(), password });
       onLoginSuccess(res);
       navigate('/');
     } catch (err) {
@@ -70,11 +71,13 @@ export function Login({ onLoginSuccess }) {
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} autoComplete="off">
           <div className="form-group">
             <label className="form-label">Username</label>
             <input
               type="text"
+              name="username"
+              autoComplete="off"
               style={{ width: '100%' }}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -85,9 +88,28 @@ export function Login({ onLoginSuccess }) {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Password</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <label className="form-label" style={{ marginBottom: 0 }}>Password</label>
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--primary)',
+                  fontSize: 12,
+                  padding: 0,
+                  cursor: 'pointer',
+                  boxShadow: 'none',
+                }}
+              >
+                {showPassword ? 'Sembunyikan' : 'Lihat'}
+              </button>
+            </div>
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
+              name="password"
+              autoComplete="new-password"
               style={{ width: '100%' }}
               value={password}
               onChange={(e) => setPassword(e.target.value)}

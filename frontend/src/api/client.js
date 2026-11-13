@@ -51,11 +51,34 @@ export async function apiRequest(endpoint, options = {}) {
   return data;
 }
 
+// Helper untuk mengobfuskasi/mengenkripsi password agar tidak tampil polos di DevTools Network Inspect Element
+export function encodeSecret(str) {
+  if (!str) return '';
+  try {
+    return 'enc:' + btoa(unescape(encodeURIComponent(str)));
+  } catch (e) {
+    return str;
+  }
+}
+
 export const api = {
   // Auth
   me: () => apiRequest('/auth/me/'),
-  login: (credentials) => apiRequest('/auth/login/', { method: 'POST', body: JSON.stringify(credentials) }),
+  login: (credentials) => {
+    const payload = {
+      username: credentials.username,
+      password: encodeSecret(credentials.password),
+    };
+    return apiRequest('/auth/login/', { method: 'POST', body: JSON.stringify(payload) });
+  },
   logout: () => apiRequest('/auth/logout/', { method: 'POST' }),
+  changePassword: (data) => {
+    const payload = {
+      old_password: encodeSecret(data.old_password),
+      new_password: encodeSecret(data.new_password),
+    };
+    return apiRequest('/auth/change-password/', { method: 'POST', body: JSON.stringify(payload) });
+  },
 
   // Summary & Meta
   getSummary: () => apiRequest('/dashboard/summary/'),
