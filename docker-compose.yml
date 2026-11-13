@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dmt_nms_backend
+    restart: unless-stopped
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-vps-production-secret-key-nms-dmt-92134}
+      - DJANGO_DEBUG=0
+      - DJANGO_ALLOWED_HOSTS=110.232.92.134,localhost,127.0.0.1,backend
+      - DJANGO_CSRF_TRUSTED_ORIGINS=http://110.232.92.134:3007,http://110.232.92.134,http://localhost:3007
+      - DJANGO_SECURE_SSL=0
+    volumes:
+      # Data SQLite persist di folder lokal VPS
+      - ./backend/db.sqlite3:/app/db.sqlite3
+      - django_static:/app/staticfiles
+    expose:
+      - "8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: dmt_nms_nginx
+    restart: unless-stopped
+    ports:
+      - "3007:80"
+    volumes:
+      - django_static:/app/staticfiles:ro
+    depends_on:
+      - backend
+
+volumes:
+  django_static:
+
