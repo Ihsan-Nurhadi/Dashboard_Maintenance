@@ -10,8 +10,8 @@ services:
     environment:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-vps-production-secret-key-nms-dmt-92134}
       - DJANGO_DEBUG=0
-      - DJANGO_ALLOWED_HOSTS=110.232.92.134,localhost,127.0.0.1,backend
-      - DJANGO_CSRF_TRUSTED_ORIGINS=http://110.232.92.134:3007,http://110.232.92.134,http://localhost:3007
+      - DJANGO_ALLOWED_HOSTS=*
+      - DJANGO_CSRF_TRUSTED_ORIGINS=http://dev.nayakacloud.com:3007,https://dev.nayakacloud.com:3007,http://dev.nayakacloud.com,https://dev.nayakacloud.com,http://110.232.92.134:3007,http://110.232.92.134,http://localhost:3007
       - DJANGO_SECURE_SSL=0
     volumes:
       # Data SQLite persist di folder lokal VPS

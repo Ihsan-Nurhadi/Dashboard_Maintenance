@@ -17,7 +17,7 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 ALLOWED_HOSTS = [
     h.strip()
     for h in os.environ.get(
-        "DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,110.232.92.134,*"
+        "DJANGO_ALLOWED_HOSTS", "*"
     ).split(",")
     if h.strip()
 ]
@@ -110,7 +110,7 @@ CSRF_TRUSTED_ORIGINS = [
     o.strip()
     for o in os.environ.get(
         "DJANGO_CSRF_TRUSTED_ORIGINS",
-        "http://localhost:5173,http://127.0.0.1:5173,http://110.232.92.134:3007,http://110.232.92.134",
+        "http://dev.nayakacloud.com:3007,https://dev.nayakacloud.com:3007,http://dev.nayakacloud.com,https://dev.nayakacloud.com,http://localhost:5173,http://127.0.0.1:5173,http://110.232.92.134:3007,http://110.232.92.134",
     ).split(",")
     if o.strip()
 ]
