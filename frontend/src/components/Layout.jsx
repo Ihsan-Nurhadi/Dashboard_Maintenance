@@ -5,6 +5,29 @@ import { api } from '../api/client';
 export function Layout({ user, onLogout }) {
   const navigate = useNavigate();
 
+  // State Sidebar: open | closed (persisted in localStorage)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    const saved = localStorage.getItem('nms_sidebar_open');
+    if (saved !== null) {
+      return saved === 'true';
+    }
+    return typeof window !== 'undefined' ? window.innerWidth > 768 : true;
+  });
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen((prev) => {
+      const next = !prev;
+      localStorage.setItem('nms_sidebar_open', String(next));
+      return next;
+    });
+  };
+
+  const handleNavClick = () => {
+    if (window.innerWidth <= 768) {
+      setIsSidebarOpen(false);
+    }
+  };
+
   // State Tema: 'light' | 'dark'
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('nms_theme') || 'light';
@@ -80,65 +103,121 @@ export function Layout({ user, onLogout }) {
 
   return (
     <div className="app-container">
-      {/* Sidebar Navigasi Utama sesuai Diagram PRD */}
-      <aside className="sidebar">
+      {/* Backdrop saat sidebar terbuka di layar mobile */}
+      <div
+        className={`sidebar-backdrop ${isSidebarOpen ? 'visible' : ''}`}
+        onClick={() => setIsSidebarOpen(false)}
+      />
+
+      {/* Sidebar Navigasi Utama */}
+      <aside className={`sidebar ${isSidebarOpen ? 'open' : 'collapsed'}`}>
         <div className="sidebar-header">
-          <div className="sidebar-brand-badge">DMT</div>
-          <div>
-            <div className="sidebar-title">NMS Dashboard</div>
-            <div className="sidebar-subtitle">Maintenance & Troubleshoot</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minWidth: 0, overflow: 'hidden' }}>
+            <div className="sidebar-brand-badge">DMT</div>
+            <div className="sidebar-brand-text">
+              <div className="sidebar-title">NMS Dashboard</div>
+              <div className="sidebar-subtitle">Maintenance & Troubleshoot</div>
+            </div>
           </div>
+          <button
+            type="button"
+            className="sidebar-close-btn"
+            onClick={toggleSidebar}
+            title="Tutup Sidebar"
+            aria-label="Tutup Sidebar"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
         </div>
 
         <nav className="sidebar-menu">
           <NavLink
             to="/"
             end
+            onClick={handleNavClick}
             className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
           >
-            Ongoing Troubleshoot
+            <svg className="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            <span>Ongoing Troubleshoot</span>
           </NavLink>
 
           <NavLink
             to="/sites"
+            onClick={handleNavClick}
             className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
           >
-            Halaman List Site
+            <svg className="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <span>Halaman List Site</span>
           </NavLink>
 
           <NavLink
             to="/ts-form"
+            onClick={handleNavClick}
             className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
           >
-            Halaman Form TS
+            <svg className="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            <span>Halaman Form TS</span>
           </NavLink>
 
           <NavLink
             to="/report-after-ts"
+            onClick={handleNavClick}
             className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
           >
-            Report After TS
+            <svg className="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 11l3 3L22 4"></path>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+            </svg>
+            <span>Report After TS</span>
           </NavLink>
 
           <NavLink
             to="/riwayat-ts"
+            onClick={handleNavClick}
             className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
           >
-            Riwayat TS
+            <svg className="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>Riwayat TS</span>
           </NavLink>
 
           <NavLink
             to="/riwayat-pemasangan"
+            onClick={handleNavClick}
             className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
           >
-            Riwayat Pemasangan
+            <svg className="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+            </svg>
+            <span>Riwayat Pemasangan</span>
           </NavLink>
 
           <NavLink
             to="/pics"
+            onClick={handleNavClick}
             className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
           >
-            Daftar PIC & Teknisi
+            <svg className="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span>Daftar PIC & Teknisi</span>
           </NavLink>
         </nav>
 
@@ -154,11 +233,33 @@ export function Layout({ user, onLogout }) {
 
       {/* Konten Halaman */}
       <main className="main-content">
-        {/* Topbar dengan Tombol Filter Light / Dark Mode di Kanan Atas */}
+        {/* Topbar dengan Tombol Toggle Sidebar dan Dark / Light Mode */}
         <header className="top-nav-bar">
-          <div className="top-nav-status">
-            <span className="live-dot"></span>
-            <span>DMT NMS Maintenance System</span>
+          <div className="top-nav-left">
+            <button
+              type="button"
+              className={`sidebar-toggle-btn ${isSidebarOpen ? 'active' : ''}`}
+              onClick={toggleSidebar}
+              title={isSidebarOpen ? "Tutup Sidebar" : "Buka Sidebar"}
+              aria-label="Toggle Sidebar"
+            >
+              {isSidebarOpen ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <line x1="3" y1="12" x2="21" y2="12"></line>
+                  <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+              )}
+            </button>
+
+            <div className="top-nav-status">
+              <span className="live-dot"></span>
+              <span>DMT NMS Maintenance System</span>
+            </div>
           </div>
 
           <div className="top-nav-actions">
