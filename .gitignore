@@ -31,7 +31,6 @@ sdist/
 *.egg-info/
 .installed.cfg
 *.egg
-
 # Virtual Environments
 venv/
 .venv/
@@ -41,13 +40,16 @@ env.bak/
 venv.bak/
 
 # ===============================
-# Django & Staticfiles
+# Django & Database
 # ===============================
 backend/staticfiles/
 staticfiles/
 *.log
 local_settings.py
-db.sqlite3-journal
+*.sqlite3
+*.sqlite3-journal
+db.sqlite3
+backend/db.sqlite3
 
 # File Environment / Kredensial Rahasia
 .env
