@@ -16,8 +16,9 @@ function getCookie(name) {
 
 export async function apiRequest(endpoint, options = {}) {
   const url = endpoint.startsWith('http') ? endpoint : `/api${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
   const headers = {
-    'Content-Type': 'application/json',
+    ...(!isFormData ? { 'Content-Type': 'application/json' } : {}),
     ...(options.headers || {}),
   };
 
@@ -96,6 +97,14 @@ export const api = {
   createSite: (data) => apiRequest('/sites/', { method: 'POST', body: JSON.stringify(data) }),
   updateSite: (siteId, data) => apiRequest(`/sites/${encodeURIComponent(siteId)}/`, { method: 'PATCH', body: JSON.stringify(data) }),
   deleteSite: (siteId) => apiRequest(`/sites/${encodeURIComponent(siteId)}/`, { method: 'DELETE' }),
+  importSites: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiRequest('/sites/import-excel/', {
+      method: 'POST',
+      body: formData,
+    });
+  },
 
   // Status Logs & CCTV
   getSiteStatusLogs: (siteId, page = 1) => apiRequest(`/sites/${encodeURIComponent(siteId)}/status-logs/?page=${page}`),

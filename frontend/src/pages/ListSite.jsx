@@ -35,6 +35,60 @@ export function ListSite() {
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editError, setEditError] = useState('');
 
+  // State Import Excel
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importFile, setImportFile] = useState(null);
+  const [importLoading, setImportLoading] = useState(false);
+  const [importError, setImportError] = useState('');
+  const [importSuccess, setImportSuccess] = useState(null);
+
+  const handleOpenImportModal = () => {
+    setImportFile(null);
+    setImportError('');
+    setImportSuccess(null);
+    setShowImportModal(true);
+  };
+
+  const handleCloseImportModal = () => {
+    setShowImportModal(false);
+    if (importSuccess) {
+      loadData();
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      if (!file.name.match(/\.(xlsx|xls)$/i)) {
+        setImportError('File harus berformat Excel (.xlsx atau .xls).');
+        setImportFile(null);
+        return;
+      }
+      setImportError('');
+      setImportFile(file);
+    }
+  };
+
+  const handleImportSubmit = async (e) => {
+    e.preventDefault();
+    if (!importFile) {
+      setImportError('Silakan pilih file Excel terlebih dahulu.');
+      return;
+    }
+    setImportLoading(true);
+    setImportError('');
+    setImportSuccess(null);
+    try {
+      const res = await api.importSites(importFile);
+      setImportSuccess(res);
+      loadData();
+    } catch (err) {
+      setImportError(err.message || 'Gagal mengimpor file Excel.');
+    } finally {
+      setImportLoading(false);
+    }
+  };
+
   const navigate = useNavigate();
 
   const loadData = async () => {
@@ -126,7 +180,15 @@ export function ListSite() {
             Master data site DMT (1.008 site awal + site baru)
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={handleOpenImportModal}
+            title="Import Site dari File Excel"
+          >
+            Import Excel
+          </button>
           <a
             href="/api/export/sites.xlsx"
             className="btn-secondary"
@@ -466,6 +528,167 @@ export function ListSite() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Import Excel Master Site */}
+      {showImportModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 200,
+          padding: 20,
+        }}>
+          <div className="card" style={{ width: '100%', maxWidth: 540, maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 18 }}>📥</span>
+                <h3 style={{ fontSize: 16 }}>Import Master Site dari Excel</h3>
+              </div>
+              <button
+                type="button"
+                className="btn-secondary btn-sm"
+                onClick={handleCloseImportModal}
+              >
+                &times; Tutup
+              </button>
+            </div>
+
+            {/* Kotak Petunjuk & Download Template */}
+            <div className="info-box" style={{ marginBottom: 16, fontSize: 13, lineHeight: 1.5 }}>
+              <div>
+                <strong>Petunjuk Format Excel:</strong>
+                <p style={{ marginTop: 4, color: 'var(--text-muted)' }}>
+                  Unggah file Excel (<strong>.xlsx</strong>) yang memuat kolom <code>SITE ID</code> (wajib), <code>SITE NAME</code>, <code>REGIONAL</code>, <code>KABUPATEN/KODYA</code>, <code>IP VPN</code>, <code>LAT LONG</code>, <code>ALAMAT</code>, dll.
+                </p>
+                <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                  <a
+                    href="/api/sites/template/"
+                    download="template_import_site.xlsx"
+                    className="btn-secondary btn-sm"
+                    style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                  >
+                    <span>📑</span> Unduh Template Excel (+ Contoh Data Dummy)
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {importError && (
+              <div style={{
+                padding: '10px 14px',
+                backgroundColor: 'var(--st-trouble-bg)',
+                color: 'var(--st-trouble-text)',
+                borderRadius: 6,
+                marginBottom: 14,
+                fontSize: 13,
+                border: '1px solid var(--st-trouble-border)',
+              }}>
+                ⚠️ {importError}
+              </div>
+            )}
+
+            {importSuccess && (
+              <div style={{
+                padding: '12px 14px',
+                backgroundColor: 'var(--st-done-bg)',
+                color: 'var(--st-done-text)',
+                borderRadius: 6,
+                marginBottom: 14,
+                fontSize: 13,
+                border: '1px solid var(--st-done-border)',
+              }}>
+                <div style={{ fontWeight: 600, marginBottom: 4 }}>
+                  ✅ {importSuccess.message}
+                </div>
+                <div style={{ fontSize: 12, opacity: 0.9 }}>
+                  • Site baru ditambahkan: <strong>{importSuccess.created_count}</strong><br />
+                  • Site diperbarui: <strong>{importSuccess.updated_count}</strong><br />
+                  {importSuccess.sample && importSuccess.sample.length > 0 && (
+                    <div style={{ marginTop: 6 }}>
+                      Contoh: {importSuccess.sample.join(', ')}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {!importSuccess ? (
+              <form onSubmit={handleImportSubmit}>
+                <div className="form-group">
+                  <label className="form-label">Pilih File Excel (.xlsx)</label>
+                  <div
+                    style={{
+                      border: '2px dashed var(--border)',
+                      borderRadius: 8,
+                      padding: '24px 16px',
+                      textAlign: 'center',
+                      backgroundColor: 'var(--bg-subtle)',
+                      cursor: 'pointer',
+                      transition: 'border-color 0.2s',
+                    }}
+                    onClick={() => document.getElementById('site-excel-file-input').click()}
+                  >
+                    <input
+                      id="site-excel-file-input"
+                      type="file"
+                      accept=".xlsx, .xls"
+                      style={{ display: 'none' }}
+                      onChange={handleFileChange}
+                    />
+                    <div style={{ fontSize: 32, marginBottom: 8 }}>📁</div>
+                    {importFile ? (
+                      <div>
+                        <strong style={{ color: 'var(--primary)' }}>{importFile.name}</strong>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+                          Ukuran: {(importFile.size / 1024).toFixed(1)} KB (Klik untuk ganti file)
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>
+                          Klik untuk memilih file Excel dari komputer Anda
+                        </div>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+                          Format didukung: .xlsx atau .xls
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={handleCloseImportModal}
+                    disabled={importLoading}
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn-primary"
+                    disabled={importLoading || !importFile}
+                  >
+                    {importLoading ? 'Sedang Memproses...' : 'Mulai Import'}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={handleCloseImportModal}
+                >
+                  Selesai & Lihat List Site
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

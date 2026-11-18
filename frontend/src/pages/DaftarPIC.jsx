@@ -221,7 +221,7 @@ export function DaftarPIC() {
                 pics.map((p) => (
                   <tr key={p.id}>
                     <td>
-                      <div style={{ fontWeight: 600, color: '#111827' }}>{p.name}</div>
+                      <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{p.name}</div>
                       {p.partner && <div style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>Mitra: {p.partner}</div>}
                     </td>
                     <td style={{ fontFamily: 'monospace', fontSize: 13 }}>
@@ -471,7 +471,7 @@ export function DaftarPIC() {
           <div className="card" style={{ width: '100%', maxWidth: 840, maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18, borderBottom: '1px solid var(--border)', paddingBottom: 12 }}>
               <div>
-                <h3 style={{ fontSize: 18, color: '#111827' }}>
+                <h3 style={{ fontSize: 18, color: 'var(--text-main)' }}>
                   Aktivitas Troubleshoot: <strong>{selectedPicActivity.name}</strong>
                 </h3>
                 <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 2 }}>
@@ -548,7 +548,7 @@ export function DaftarPIC() {
             {/* Bagian 2: Riwayat Troubleshoot yang Pernah Dikerjakan */}
             <div style={{ marginBottom: 24 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                <h4 style={{ fontSize: 14.5, color: '#111827', fontWeight: 700 }}>
+                <h4 style={{ fontSize: 14.5, color: 'var(--text-main)', fontWeight: 700 }}>
                   2. Riwayat Troubleshoot yang Pernah Ditangani ({selectedPicActivity.history_count || 0} Total)
                 </h4>
               </div>
@@ -594,7 +594,7 @@ export function DaftarPIC() {
             {/* Bagian 3: Daftar Site Master yang Ditugaskan */}
             {selectedPicActivity.assigned_sites?.length > 0 && (
               <div>
-                <h4 style={{ fontSize: 14.5, color: '#111827', fontWeight: 700, marginBottom: 10 }}>
+                <h4 style={{ fontSize: 14.5, color: 'var(--text-main)', fontWeight: 700, marginBottom: 10 }}>
                   3. Site Master Assigned ({selectedPicActivity.assigned_sites_count} Site)
                 </h4>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>

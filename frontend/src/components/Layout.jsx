@@ -257,7 +257,6 @@ export function Layout({ user, onLogout }) {
             </button>
 
             <div className="top-nav-status">
-              <span className="live-dot"></span>
               <span>DMT NMS Maintenance System</span>
             </div>
           </div>
@@ -280,7 +279,7 @@ export function Layout({ user, onLogout }) {
               title="Ganti Password Akun"
               style={{ fontSize: 12 }}
             >
-              🔑 Ganti Password
+              Ganti Password
             </button>
 
             <span className="user-profile-badge">
